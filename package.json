@@ -1,6 +1,6 @@
 {
   "name": "discord-mongo-currency",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A discord.js currency package for MongoDB.",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,6 @@
   "homepage": "https://github.com/Gav-King/discord-mongo-currency#readme",
   "dependencies": {
     "mongoose": "^5.10.0"
-  }
+  },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }
