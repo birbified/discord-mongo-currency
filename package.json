@@ -26,6 +26,5 @@
   "homepage": "https://github.com/Gav-King/discord-mongo-currency#readme",
   "dependencies": {
     "mongoose": "^5.10.0"
-  },
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
+  }
 }
