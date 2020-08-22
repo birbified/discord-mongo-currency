@@ -117,7 +117,7 @@ class mongoCurrency {
             return amount;
         }
 
-        user.coinsInWallet - parseInt(amount);
+        user.coinsInWallet -= parseInt(amount);
 
         await user.save()
         .catch(err => console.log(err));
@@ -193,58 +193,6 @@ class mongoCurrency {
      * 
      * @param {string} userId - A discord user ID.
      * @param {string} guildId - A discord guild ID.
-     * @param {string} amount - Amount to deposit.
-     */
-
-    static async deposit(userId, guildId, amount) {
-        if (!userId) throw new TypeError("You didn't provide a user ID.");
-        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
-        if (!amount) throw new TypeError("You didn't provide an amount of coins.");
-        if (isNaN(amount)) throw new TypeError("The amount must be a number.");
-        if (amount < 0) throw new TypeError("New amount must not be under 0.");
-
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
-
-        if (!user) {
-            let newData = new currencyModel({
-                userId: userId,
-                guildId: guildId,
-                bankSpace: 1000,
-                coinsInBank: 0,
-                coinsInWallet: 0
-            });
-
-            await newData.save()
-            .catch(err => console.log(err));
-
-            return amount;
-        }
-
-        if (amount > user.coinsInWallet) {
-            user.coinsInBank += (user.coinsInWallet - parseInt(amount));
-
-            user.coinsInWallet -= (user.coinsInWallet - parseInt(amount));
-
-            await user.save()
-            .catch(err => console.log(err));
-
-            return amount;
-        } else {
-            user.coinsInBank += parseInt(amount);
-
-            user.coinsInWallet -= parseInt(amount);
-
-            await user.save()
-            .catch(err => console.log(err));
-
-            return amount;
-        }
-    }
-
-    /**
-     * 
-     * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      */
 
     static async deleteUser(userId, guildId) {
@@ -258,6 +206,22 @@ class mongoCurrency {
 
         await user.save()
         .catch(err => console.log(err));
+    }
+
+    /**
+     * 
+     * @param {string} guildId - A discord guild ID.
+     * @param {number} amount - The amount of users to show.
+     */
+
+    static async generateLeaderboard(guildId, amount) {
+        if (!guildId) throw new TypeError("Please provide a guild ID.");
+        if (!amount) throw new TypeError("Please provide the amount of users to show.");
+        if (isNaN(amount)) throw new TypeError("Amount must be a number");
+
+        let users = await currencyModel.find({ guildId: guildId }).sort([['coinsInWallet', 'descending']]).exec();
+
+        return users.slice(0, amount);
     }
 }
 

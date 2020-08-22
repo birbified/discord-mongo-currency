@@ -33,3 +33,6 @@ Gives bank space to a user.
 
 ##### deposit(userId, guildId, amount)
 Deposits coins from the users wallet. Still not finished completely.
+
+##### generateLeaderboard(guildId, amount)
+Generates a leaderboard. See examples below.
