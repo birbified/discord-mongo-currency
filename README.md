@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/discord-mongo-currency.png)](https://nodei.co/npm/discord-mongo-currency/)
+
 # discord-mongo-currency
 A npm package for making economy bots.
 
