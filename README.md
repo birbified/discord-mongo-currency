@@ -76,7 +76,7 @@ Generates a leaderboard. See examples for an example on how to use.
     
     if (leaderboard.length < 1) return message.channel.send("Nobody's on the leaderboard.");
     
-    const mappedLeaderboard = leaderboard.map(i => `${client.users.cache.get(i.userId).tag ? client.users.cache.get(u.userId).tag : "Nobody"} - ${i.coinsInWallet}`);
+    const mappedLeaderboard = leaderboard.map(i => `${client.users.cache.get(i.userId).tag ? client.users.cache.get(i.userId).tag : "Nobody"} - ${i.coinsInWallet}`);
     
     const embed = new MessageEmbed()
     .setTitle(`${message.guild.name}\'s Leaderboard`)
