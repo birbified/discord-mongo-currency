@@ -68,6 +68,100 @@ class DiscordCurrency {
         user.coinsInWallet += parseInt(amount);
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
         this.cache.set(`${userId}_${guildId}`, user);
+        return user;
+    }
+    
+    /**
+     * @param {String} userId - Discord user ID
+     * @param {String} guildId - Discord guild ID
+     * @param {Number} amount - Amount of coins to subtract
+     */
+    
+    async subtractCoins(userId, guildId, amount) {
+        if (!userId) throw new Error('No user ID was provided');
+        if (!guildId) throw new Error('No guild ID was provided');
+        if (!amount) throw new Error('No amount was provided');
+        if (isNaN(parseInt(amount))) throw new Error('Amount must be a number');
+        if (amount < 1) throw new Error('Amount must be greater than zero');
+        
+        const user = await this.findUser(userId, guildId);
+        
+        if (amount > user.coinsInWallet) user.coinsInWallet = 0;
+        else user.coinsInWallet -= parseInt(amount);
+        
+        await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
+        this.cache.set(`${userId}_${guildId}`, user);
+        return user;
+    }
+    
+    /**
+     * @param {String} userId - Discord user ID
+     * @param {String} guildId - Discord guild ID
+     * @param {Number} amount - Amount of bank space to add
+     */
+    
+    async giveBankSpace(userId, guildId, amount) {
+        if (!userId) throw new Error('No user ID was provided');
+        if (!guildId) throw new Error('No guild ID was provided');
+        if (!amount) throw new Error('No amount was provided');
+        if (isNaN(parseInt(amount))) throw new Error('Amount must be a number');
+        if (amount < 1) throw new Error('Amount must be greater than zero');
+        
+        const user = await this.findUser(userId, guildId);
+        
+        user.bankSpace += amount;
+        await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
+        this.cache.set(`${userId}_${guildId}`, user);
+        return user;
+    }
+    
+    /**
+     * @param {String} userId - Discord user ID
+     * @param {String} guildId - Discord guild ID
+     * @param {Number} amount - Amount of money to deposit
+     */
+    
+    async deposit(userId, guildId, amount) {
+        if (!userId) throw new Error('No user ID was provided');
+        if (!guildId) throw new Error('No guild ID was provided');
+        if (!amount) throw new Error('No amount was provided');
+        if (isNaN(parseInt(amount))) throw new Error('Amount must be a number');
+        if (amount < 1) throw new Error('Amount must be greater than zero');
+        
+        const user = await this.findUser(userId, guildId);
+        
+        if (amount > user.coinsInWallet) return;
+        if ((amount + user.coinsInBank) > user.bankSpace) return;
+        
+        user.coinsInWallet -= parseInt(amount);
+        user.coinsInBank += parseInt(amount);
+        await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
+        this.cache.set(`${userId}_${guildId}`, user);
+        return user;
+    }
+    
+    /**
+     * @param {String} userId - Discord user ID
+     * @param {String} guildId - Discord guild ID
+     * @param {Number} amount - Amount of money to withdraw
+     */
+    
+    async withdraw(userId, guildId, amount) {
+        if (!userId) throw new Error('No user ID was provided');
+        if (!guildId) throw new Error('No guild ID was provided');
+        if (!amount) throw new Error('No amount was provided');
+        if (isNaN(parseInt(amount))) throw new Error('Amount must be a number');
+        if (amount < 1) throw new Error('Amount must be greater than zero');
+        
+        const user = await this.findUser(userId, guildId);
+        
+        if (amount > user.coinsInBank) return;
+        
+        user.coinsInWallet += parseInt(amount);
+        user.coinsInBank -= parseInt(amount);
+        await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
+        this.cache.set(`${userId}_${guildId}`, user);
+        return user;
     }
 }
 
