@@ -1,19 +1,16 @@
 const mongoose = require('mongoose');
 const currencyModel = require('./models/CurrencyModel');
+const cache = new Map();
 
 class DiscordCurrency {
     /**
-     * @param {Object} options - DiscordCurrency options
+     * @param {String} connection - MongoDB connection string
      */
     
-    constructor(options = {}) {
-        if (Object.keys(options).length === 0) throw new Error('No options were provided');
-        if (!options.url) throw new Error('No MongoDB connection string was provided');
+    static connect(connection) {
+        if (!connection) throw new Error('No MongoDB connection string was provided.');
         
-        this.options = options;
-        this.cache = new Map();
-        
-        mongoose.connect(options.url, {
+        mongoose.connect(connection, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
@@ -24,11 +21,11 @@ class DiscordCurrency {
      * @param {String} guildId - Discord guild ID 
      */
     
-    async findUser(userId, guildId) {
+    static async findUser(userId, guildId) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         
-        let user = this.cache.get(`${userId}_${guildId}`);
+        let user = cache.get(`${userId}_${guildId}`);
         if (!user) {
             let e = await currencyModel.findOne({ userId: userId, guildId: guildId });
             if (!e) {
@@ -42,7 +39,7 @@ class DiscordCurrency {
             }
             
             user = e;
-            this.cache.set(`${userId}_${guildId}`, user);
+            cache.set(`${userId}_${guildId}`, user);
         }
         
         return user;
@@ -54,7 +51,7 @@ class DiscordCurrency {
      * @param {Number} amount - Amount of coins to give
      */
     
-    async giveCoins(userId, guildId, amount) {
+    static async giveCoins(userId, guildId, amount) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         if (!amount) throw new Error('No amount was provided');
@@ -67,7 +64,7 @@ class DiscordCurrency {
         
         user.coinsInWallet += parseInt(amount);
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
-        this.cache.set(`${userId}_${guildId}`, user);
+        cache.set(`${userId}_${guildId}`, user);
         return user;
     }
     
@@ -77,7 +74,7 @@ class DiscordCurrency {
      * @param {Number} amount - Amount of coins to subtract
      */
     
-    async subtractCoins(userId, guildId, amount) {
+    static async subtractCoins(userId, guildId, amount) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         if (!amount) throw new Error('No amount was provided');
@@ -90,7 +87,7 @@ class DiscordCurrency {
         else user.coinsInWallet -= parseInt(amount);
         
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
-        this.cache.set(`${userId}_${guildId}`, user);
+        cache.set(`${userId}_${guildId}`, user);
         return user;
     }
     
@@ -100,7 +97,7 @@ class DiscordCurrency {
      * @param {Number} amount - Amount of bank space to add
      */
     
-    async giveBankSpace(userId, guildId, amount) {
+    static async giveBankSpace(userId, guildId, amount) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         if (!amount) throw new Error('No amount was provided');
@@ -111,7 +108,7 @@ class DiscordCurrency {
         
         user.bankSpace += amount;
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
-        this.cache.set(`${userId}_${guildId}`, user);
+        cache.set(`${userId}_${guildId}`, user);
         return user;
     }
     
@@ -121,7 +118,7 @@ class DiscordCurrency {
      * @param {Number} amount - Amount of money to deposit
      */
     
-    async deposit(userId, guildId, amount) {
+    static async deposit(userId, guildId, amount) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         if (!amount) throw new Error('No amount was provided');
@@ -136,7 +133,7 @@ class DiscordCurrency {
         user.coinsInWallet -= parseInt(amount);
         user.coinsInBank += parseInt(amount);
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
-        this.cache.set(`${userId}_${guildId}`, user);
+        cache.set(`${userId}_${guildId}`, user);
         return user;
     }
     
@@ -146,7 +143,7 @@ class DiscordCurrency {
      * @param {Number} amount - Amount of money to withdraw
      */
     
-    async withdraw(userId, guildId, amount) {
+    static async withdraw(userId, guildId, amount) {
         if (!userId) throw new Error('No user ID was provided');
         if (!guildId) throw new Error('No guild ID was provided');
         if (!amount) throw new Error('No amount was provided');
@@ -160,7 +157,7 @@ class DiscordCurrency {
         user.coinsInWallet += parseInt(amount);
         user.coinsInBank -= parseInt(amount);
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
-        this.cache.set(`${userId}_${guildId}`, user);
+        cache.set(`${userId}_${guildId}`, user);
         return user;
     }
 }
