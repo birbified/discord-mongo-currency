@@ -60,8 +60,6 @@ class DiscordCurrency {
         
         const user = await this.findUser(userId, guildId);
         
-        if ((user.coinsInWallet + amount) > user.bankSpace) return;
-        
         user.coinsInWallet += parseInt(amount);
         await currencyModel.updateOne({ userId: userId, guildId: guildId }, user);
         cache.set(`${userId}_${guildId}`, user);
