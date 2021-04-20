@@ -1,7 +1,7 @@
 [![NPM](https://nodei.co/npm/discord-mongo-currency.png)](https://www.npmjs.com/package/discord-mongo-currency/)
 
 # discord-mongo-currency
-A npm package for making economy bots.
+A npm package for making economy bots. Automatically caches data.
 
 # Installation
 ```npm i discord-mongo-currency```
@@ -9,23 +9,21 @@ A npm package for making economy bots.
 # Starting
 Start off by connecting discord-mongo-currency to MongoDB.
 ```js
-const mongoCurrency = require('discord-mongo-currency');
+    const DiscordCurrency = require('discord-mongo-currency');
 
-mongoCurrency.connect('some connection string');
+    const currency = new DiscordCurrency({
+        url: 'your connection string'
+    });
+    
+    client.currency = currency; // for global use
 ```
 
 # All Methods
-##### createUser(userId, guildId)
-Adds a user to the database.
-
-##### deleteUser(userId, guildId)
-Deletes a user from the database.
-
 ##### giveCoins(userId, guildId, amount)
 Gives coins to a user. Adds the user to the database if the user is saved to the database.
 
-##### deductCoins(userId, guildId, amount)
-Deducts coins from a user.
+##### subtractCoins(userId, guildId, amount)
+Subtracts coins from a user.
 
 ##### findUser(userId, guildId)
 Finds the user in the database.
@@ -34,20 +32,18 @@ Finds the user in the database.
 Gives bank space to a user.
 
 ##### deposit(userId, guildId, amount)
-Deposits coins from the users wallet. Still not finished completely.
+Deposits coins from the users wallet. ~~Still not finished completely.~~ Done!
 
-##### generateLeaderboard(guildId, amount)
-Generates a leaderboard. See examples for an example on how to use.
+##### withdraw(guildId, amount)
+Withdraws coins.
 
 # Command Examples
 ##### Balance Command
 ```js
-    const mongoCurrency = require('discord-mongo-currency');
     const { MessageEmbed } = require('discord.js');
 
     const member = message.mentions.members.first() || message.member;
-
-    const user = await mongoCurrency.findUser(member.id, message.guild.id); // Get the user from the database.
+    const user = await bot.currency.findUser(member.id, message.guild.id); // Get the user from the database.
 
     const embed = new MessageEmbed()
     .setTitle(`${member.user.username}'s Balance`)
@@ -60,27 +56,6 @@ Generates a leaderboard. See examples for an example on how to use.
 
 ##### Beg Command
 ```js
-    const mongoCurrency = require('discord-mongo-currency');
-
     const randomCoins = Math.floor(Math.random() * 99) + 1; // Random amount of coins.
-    
     await mongoCurrency.giveCoins(message.member.id, message.guild.id, randomCoins);
-```
-
-##### Leaderboard Command
-```js
-    const mongoCurrency = require('discord-mongo-currency');
-    const { MessageEmbed } = require('discord.js');
-    
-    const leaderboard = await mongoCurrency.generateLeaderboard(message.guild.id, 10);
-    
-    if (leaderboard.length < 1) return message.channel.send("Nobody's on the leaderboard.");
-    
-    const mappedLeaderboard = leaderboard.map(i => `${client.users.cache.get(i.userId).tag ? client.users.cache.get(u.userId).tag : "Nobody"} - ${i.coinsInWallet}`);
-    
-    const embed = new MessageEmbed()
-    .setTitle(`${message.guild.name}\'s Leaderboard`)
-    .setDescription(`${mappedLeaderboard.join('\n')}`);
-    
-    message.channel.send(embed);
 ```
