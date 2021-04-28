@@ -194,7 +194,8 @@ class mongoCurrency {
 
     /**
      * 
-     * @param {String} item 
+     * @param {String} userId
+     * @param {Object} item 
      * @param {Number} amount 
      */
     static async addItem(userId, item, amount) {
@@ -204,8 +205,27 @@ class mongoCurrency {
 
         let user = await currencyModel.findOne({ userId: userId});
 
-        user.inventory.find(i => i.name === item).amount += amount;
-        data.save();
+        if(!user) return false;
+
+        let useritem = user.inventory.find(i => i.name === item)
+        if(useritem) useritem.amount += amount;
+        else useritem = user.inventory.push(item);
+        user.save();
+    }
+
+    static async addBadge(userId, badge) {
+        if(!userId) throw new TypeError('Please provide a user ID');
+        if(!badge) throw new TypeError('Please provide a badge');
+
+        let user = await currencyModel.findOne({ userId: userId });
+
+        if(!user) return false;
+
+        const badge = user.badges.find(b => b === badge);
+        if(!badge) user.badges.push(badge)
+        else return false;
+        
+        user.save();
     }
 
     /**
