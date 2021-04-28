@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const CurrencySchema = new mongoose.Schema({
-	guildId: { type: String, required: false },
 	userId: { type: String, required: true },
 	nuggets: { type: Number, default: 0 },
 	fridge: { type: Number, default: 0 },
