@@ -25,7 +25,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A valid discord user ID.
-     * @param {string} guildId - A valid discord guild ID.
      */
 
     static async find(userId) {
@@ -40,7 +39,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      * @param {number} amount - Amount of coins to give.
      */
     
@@ -55,9 +53,9 @@ class mongoCurrency {
         if (!user) {
             const newData = new currencyModel({
                 userId: userId,
-                bankSpace: 1000,
-                coinsInBank: 0,
-                coinsInWallet: parseInt(amount)
+                fridgeSpace: 1000,
+                fridge: 0,
+                nuggets: parseInt(amount)
             });
 
             await newData.save()
@@ -66,7 +64,7 @@ class mongoCurrency {
             return amount;
         }
 
-        user.coinsInWallet += parseInt(amount);
+        user.nuggets += parseInt(amount);
 
         await user.save()
         .catch(err => console.log(err));
@@ -77,7 +75,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      * @param {string} amount - Amount of coins to deduct.
      */
 
@@ -92,9 +89,9 @@ class mongoCurrency {
         if (!user) {
             const newData = new currencyModel({
                 userId: userId,
-                bankSpace: 1000,
-                coinsInBank: 0,
-                coinsInWallet: 0
+                fridgeSpace: 1000,
+                fridge: 0,
+                nuggets: 0
             });
 
             await newData.save()
@@ -103,8 +100,8 @@ class mongoCurrency {
             return amount;
         }
 
-        if (amount > user.coinsInWallet) {
-            user.coinsInWallet -= user.coinsInWallet;
+        if (amount > user.nuggets) {
+            user.nuggets -= user.nuggets;
 
             await user.save()
             .catch(err => console.log(err));
@@ -112,7 +109,7 @@ class mongoCurrency {
             return amount;
         }
 
-        user.coinsInWallet -= parseInt(amount);
+        user.nuggets -= parseInt(amount);
 
         await user.save()
         .catch(err => console.log(err));
@@ -123,7 +120,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      * @param {string} amount - Amount of bank space to give.
      */
     
@@ -138,9 +134,9 @@ class mongoCurrency {
         if (!user) {
             let newData = new currencyModel({
                 userId: userId,
-                bankSpace: 1000 + parseInt(amount),
-                coinsInBank: 0,
-                coinsInWallet: 0
+                fridgeSpace: 1000 + parseInt(amount),
+                fridge: 0,
+                nuggets: 0
             });
 
             await newData.save()
@@ -149,7 +145,7 @@ class mongoCurrency {
             return amount;
         }
 
-        user.bankSpace += parseInt(amount);
+        user.fridge += parseInt(amount);
 
         await user.save()
         .catch(err => console.log(err));
@@ -160,7 +156,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      */
 
     static async createUser(userId) {
@@ -171,9 +166,9 @@ class mongoCurrency {
 
         let newData = new currencyModel({
             userId: userId,
-            bankSpace: 1000,
-            coinsInBank: 0,
-            coinsInWallet: 0
+            fridgeSpace: 1000,
+            fridge: 0,
+            nuggets: 0
         });
 
         await newData.save()
@@ -183,7 +178,6 @@ class mongoCurrency {
     /**
      * 
      * @param {string} userId - A discord user ID.
-     * @param {string} guildId - A discord guild ID.
      */
 
     static async deleteUser(userId) {
@@ -200,19 +194,51 @@ class mongoCurrency {
 
     /**
      * 
-     * @param {string} guildId - A discord guild ID.
-     * @param {number} amount - The amount of users to show.
-     
+     * @param {String} item 
+     * @param {Number} amount 
+     */
+    static async addItem(userId, item, amount) {
+        if(!item) throw new TypeError('Please provide an item');
+        if(!amount) throw new TypeError('Please provide an amount');
+        if(isNaN(amount)) throw new TypeError('Please provide a valid amount');
 
-    static async generateLeaderboard(guildId, amount) {
-        if (!guildId) throw new TypeError("Please provide a guild ID.");
-        if (!amount) throw new TypeError("Please provide the amount of users to show.");
-        if (isNaN(amount)) throw new TypeError("Amount must be a number");
+        let user = await currencyModel.findOne({ userId: userId});
 
-        let users = await currencyModel.find({ guildId: guildId }).sort([['coinsInWallet', 'descending']]).exec();
+        user.inventory.find(i => i.name === item).amount += amount;
+        data.save();
+    }
 
-        return users.slice(0, amount);
-    }*/
+    /**
+     * 
+     * @param {String} userId
+     * @private
+     * @returns {Promise<mongoose.Document[]>} Promise<mongoose.Document[]>
+     * @description Gives all the data saved in database
+     */
+
+    static async _get() {
+        let user = await currencyModel.find();
+
+        if(!user) return false;
+        return user;
+    }
+
+    /**
+     * 
+     * @param {String} userId
+     * @param {mongoose.Document} data
+     * @private
+     * @description Use the _get method to get the data, modify it and save/update it using this method.
+     */
+
+    static async _update(userId, data) {
+        if(!userId) throw new TypeError('Please provide a valid user ID.');
+        if(!data) throw new TypeError('Please provide data to update.');
+        let user = await currencyModel.findOne({ userId: userId });
+        if(!user) return false;
+
+        user.updateOne(data);
+    }
 }
 
 module.exports = mongoCurrency;

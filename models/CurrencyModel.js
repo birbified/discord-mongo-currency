@@ -4,7 +4,7 @@ const CurrencySchema = new mongoose.Schema({
 	userId: { type: String, required: true },
 	nuggets: { type: Number, default: 0 },
 	fridge: { type: Number, default: 0 },
-	bankSpace: { type: Number, default: 2000 },
+	fridgeSpace: { type: Number, default: 2000 },
 	inventory: [
 		{ type: Object, default: {} },
 	],
