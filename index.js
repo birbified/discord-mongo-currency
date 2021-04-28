@@ -28,11 +28,10 @@ class mongoCurrency {
      * @param {string} guildId - A valid discord guild ID.
      */
 
-    static async findUser(userId, guildId) {
+    static async find(userId) {
         if (!userId) throw new TypeError("You didn't provide a user ID.");
-        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
         if (!user) return false;
 
         return user;
@@ -45,19 +44,17 @@ class mongoCurrency {
      * @param {number} amount - Amount of coins to give.
      */
     
-    static async giveCoins(userId, guildId, amount) {
+    static async giveCoins(userId, amount) {
         if (!userId) throw new TypeError("You didn't provide a user ID.");
-        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
         if (!amount) throw new TypeError("You didn't provide an amount of coins.");
         if (isNaN(amount)) throw new TypeError("The amount must be a number.");
         if (amount < 0) throw new TypeError("New amount must not be under 0.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
 
         if (!user) {
             const newData = new currencyModel({
                 userId: userId,
-                guildId: guildId,
                 bankSpace: 1000,
                 coinsInBank: 0,
                 coinsInWallet: parseInt(amount)
@@ -86,17 +83,15 @@ class mongoCurrency {
 
     static async deductCoins(userId, guildId, amount) {
         if (!userId) throw new TypeError("You didn't provide a user ID.");
-        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
         if (!amount) throw new TypeError("You didn't provide an amount of coins.");
         if (isNaN(amount)) throw new TypeError("The amount must be a number.");
         if (amount < 0) throw new TypeError("New amount must not be under 0.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
 
         if (!user) {
             const newData = new currencyModel({
                 userId: userId,
-                guildId: guildId,
                 bankSpace: 1000,
                 coinsInBank: 0,
                 coinsInWallet: 0
@@ -132,19 +127,17 @@ class mongoCurrency {
      * @param {string} amount - Amount of bank space to give.
      */
     
-    static async giveBankSpace(userId, guildId, amount) {
+    static async giveBankSpace(userId, amount) {
         if (!userId) throw new TypeError("You didn't provide a user ID.");
-        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
         if (!amount) throw new TypeError("You didn't provide an amount of coins.");
         if (isNaN(amount)) throw new TypeError("The amount must be a number.");
         if (amount < 0) throw new TypeError("New amount must not be under 0.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
 
         if (!user) {
             let newData = new currencyModel({
                 userId: userId,
-                guildId: guildId,
                 bankSpace: 1000 + parseInt(amount),
                 coinsInBank: 0,
                 coinsInWallet: 0
@@ -170,16 +163,14 @@ class mongoCurrency {
      * @param {string} guildId - A discord guild ID.
      */
 
-    static async createUser(userId, guildId) {
+    static async createUser(userId) {
         if (!userId) throw new TypeError("Please provide a user ID.");
-        if (!guildId) throw new TypeError("Please provide a guild ID.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
         if (user) return false;
 
         let newData = new currencyModel({
             userId: userId,
-            guildId: guildId,
             bankSpace: 1000,
             coinsInBank: 0,
             coinsInWallet: 0
@@ -195,14 +186,13 @@ class mongoCurrency {
      * @param {string} guildId - A discord guild ID.
      */
 
-    static async deleteUser(userId, guildId) {
+    static async deleteUser(userId) {
         if (!userId) throw new TypeError("Please provide a user ID.");
-        if (!guildId) throw new TypeError("Please provide a guild ID.");
 
-        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+        let user = await currencyModel.findOne({ userId: userId });
         if (!user) return false;
 
-        await currencyModel.findOneAndRemove({ userId: userId, guildId: guildId });
+        await currencyModel.findOneAndRemove({ userId: userId });
 
         await user.save()
         .catch(err => console.log(err));
@@ -212,7 +202,7 @@ class mongoCurrency {
      * 
      * @param {string} guildId - A discord guild ID.
      * @param {number} amount - The amount of users to show.
-     */
+     
 
     static async generateLeaderboard(guildId, amount) {
         if (!guildId) throw new TypeError("Please provide a guild ID.");
@@ -222,7 +212,7 @@ class mongoCurrency {
         let users = await currencyModel.find({ guildId: guildId }).sort([['coinsInWallet', 'descending']]).exec();
 
         return users.slice(0, amount);
-    }
+    }*/
 }
 
 module.exports = mongoCurrency;
