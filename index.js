@@ -1,38 +1,46 @@
-var connection;
 const mongoose = require('mongoose');
 const currencyModel = require('./models/CurrencyModel');
 
-mongoose.set('useFindAndModify', false);
-
-class mongoCurrency {
-
+class DiscordCurrency {
     /**
-     * 
-     * @param {string} url - A MongoDB connection string.
+     * @param {object} options - Manager Options
      */
-
-    static async connect(url) {
-        if (!url) throw new TypeError("You didn't provide a MongoDB connection string");
-
-        connection = url;
-
-        return mongoose.connect(url, {
+    
+    constructor(options) {
+        if (!options.url) throw new Error('No connection string was provided.');
+        this.cache = new Map();
+        this.url = options.url;
+        mongoose.connect(this.url, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
     }
 
     /**
-     * 
-     * @param {string} userId - A valid discord user ID.
+     * @param {String} userId - Discord user ID
+     * @param {String} guildId - Discord guild ID 
      */
-
-    static async findUser(userId) {
-        if (!userId) throw new TypeError("You didn't provide a user ID.");
-
-        let user = await currencyModel.findOne({ userId: userId });
-        if (!user) return false;
-
+    
+    async findUser(userId, guildId) {
+        if (!userId) throw new Error('No user ID was provided');
+        if (!guildId) throw new Error('No guild ID was provided');
+        
+        let user = this.cache.get(`${userId}_${guildId}`);
+        if (!user) {
+            let e = await currencyModel.findOne({ userId: userId, guildId: guildId });
+            if (!e) {
+                e = await currencyModel.create({
+                    userId: userId,
+                    bankSpace: 1000,
+                    coinsInBank: 0,
+                    coinsInWallet: 0
+                });
+            }
+            
+            user = e;
+            this.cache.set(`${userId}_${guildId}`, user);
+        }
+        
         return user;
     }
 
