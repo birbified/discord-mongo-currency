@@ -27,7 +27,7 @@ class mongoCurrency {
      * @param {string} userId - A valid discord user ID.
      */
 
-    static async find(userId) {
+    static async findUser(userId) {
         if (!userId) throw new TypeError("You didn't provide a user ID.");
 
         let user = await currencyModel.findOne({ userId: userId });
