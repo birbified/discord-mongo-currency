@@ -221,8 +221,8 @@ class mongoCurrency {
 
         if(!user) return false;
 
-        const badge = user.badges.find(b => b === badge);
-        if(!badge) user.badges.push(badge)
+        const Badge = user.badges.find(b => b === badge);
+        if(!Badge) user.badges.push(badge)
         else return false;
         
         user.save();
