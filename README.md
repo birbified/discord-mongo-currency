@@ -84,3 +84,5 @@ Generates a leaderboard. See examples for an example on how to use.
     
     message.channel.send(embed);
 ```
+
+noob package lol
