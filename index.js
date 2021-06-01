@@ -84,7 +84,7 @@ class mongoCurrency {
      * @param {string} amount - Amount of coins to deduct.
      */
 
-    static async deductCoins(userId, guildId, amount) {
+    static async deductCoins(userId, guildId, amount) { // deduct means "remove", something in particular.
         if (!userId) throw new TypeError("You didn't provide a user ID.");
         if (!guildId) throw new TypeError("You didn't provide a guild ID.");
         if (!amount) throw new TypeError("You didn't provide an amount of coins.");
