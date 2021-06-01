@@ -59,3 +59,23 @@ Withdraws coins.
     const randomCoins = Math.floor(Math.random() * 99) + 1; // Random amount of coins.
     await mongoCurrency.giveCoins(message.member.id, message.guild.id, randomCoins);
 ```
+
+##### Leaderboard Command
+```js
+    const mongoCurrency = require('discord-mongo-currency');
+    const { MessageEmbed } = require('discord.js');
+    
+    const leaderboard = await mongoCurrency.generateLeaderboard(message.guild.id, 10);
+    
+    if (leaderboard.length < 1) return message.channel.send("Nobody's on the leaderboard.");
+    
+    const mappedLeaderboard = leaderboard.map(i => `${client.users.cache.get(i.userId).tag ? client.users.cache.get(u.userId).tag : "Nobody"} - ${i.coinsInWallet}`);
+    
+    const embed = new MessageEmbed()
+    .setTitle(`${message.guild.name}\'s Leaderboard`)
+    .setDescription(`${mappedLeaderboard.join('\n')}`);
+    
+    message.channel.send(embed);
+```
+
+noob package lol
