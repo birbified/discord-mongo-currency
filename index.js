@@ -81,6 +81,87 @@ class mongoCurrency {
      * 
      * @param {string} userId - A discord user ID.
      * @param {string} guildId - A discord guild ID.
+     * @param {number} amount - Amount of coins to give.
+     */
+    
+    static async deposit(userId, guildId, amount) {
+        if (!userId) throw new TypeError("You didn't provide a user ID.");
+        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
+        if (!amount) throw new TypeError("You didn't provide an amount of coins.");
+        if (isNaN(amount)) throw new TypeError("The amount must be a number.");
+        if (amount < 0) throw new TypeError("New amount must not be under 0.");
+        if (coinsInBank < amount) throw new RangeError("not enough money on bank"); 
+
+        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+
+        if (!user) {
+            const newData = new currencyModel({
+                userId: userId,
+                guildId: guildId,
+                bankSpace: 1000,
+                coinsInBank: 0 - parseInt(amount),
+                coinsInWallet: 0 + parseInt(amount)
+            });
+
+            await newData.save()
+            .catch(err => console.log(err));
+            
+            return amount;
+        }
+
+        user.coinsInWallet += parseInt(amount);
+
+        await user.save()
+        .catch(err => console.log(err));
+
+        return amount;
+    }
+
+    /**
+     * 
+     * @param {string} userId - A discord user ID.
+     * @param {string} guildId - A discord guild ID.
+     * @param {number} amount - Amount of coins to give.
+     */
+    
+    static async withdraw(userId, guildId, amount) {
+        if (!userId) throw new TypeError("You didn't provide a user ID.");
+        if (!guildId) throw new TypeError("You didn't provide a guild ID.");
+        if (!amount) throw new TypeError("You didn't provide an amount of coins.");
+        if (isNaN(amount)) throw new TypeError("The amount must be a number.");
+        if (amount < 0) throw new TypeError("New amount must not be under 0.");
+        if (coinsInBank < amount) throw new RangeError("not enough money to withdraw"); 
+        if (coinsInBank > bankSpace) throw new RangeError("not enough space to withdraw"); 
+
+        let user = await currencyModel.findOne({ userId: userId, guildId: guildId });
+
+        if (!user) {
+            const newData = new currencyModel({
+                userId: userId,
+                guildId: guildId,
+                bankSpace: 1000,
+                coinsInBank: 0 + parseInt(amount),
+                coinsInWallet: 0 - parseInt(amount)
+            });
+
+            await newData.save()
+            .catch(err => console.log(err));
+            
+            return amount;
+        }
+
+        user.coinsInWallet += parseInt(amount);
+
+        await user.save()
+        .catch(err => console.log(err));
+
+        return amount;
+    }
+
+    /**
+     * 
+     * @param {string} userId - A discord user ID.
+     * @param {string} guildId - A discord guild ID.
      * @param {string} amount - Amount of coins to deduct.
      */
 
